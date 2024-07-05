@@ -1,15 +1,19 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 const { Artist } = require("./models/artist.model.js");
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
 app.use(express.json());
 
+const mongoUri = process.env.MONGODB_URI;
+const port = process.env.PORT || 3000;
+
 mongoose
-  .connect(
-    "mongodb+srv://lupuadelin4:jrQPrEd1Ck5orU5Q@backenddb.y81vyyg.mongodb.net/Node-API?retryWrites=true&w=majority&appName=BackendDB",
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
+  .connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log("Connected to database!");
   })
@@ -17,8 +21,8 @@ mongoose
     console.log("Connection failed!", error);
   });
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
 
 app.get("/", (req, res) => {
