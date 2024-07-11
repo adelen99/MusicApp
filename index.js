@@ -8,7 +8,7 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
-
+app.use(cors());
 const mongoUri = process.env.MONGODB_URI;
 const port = process.env.PORT || 3000;
 
@@ -23,10 +23,6 @@ mongoose
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
-});
-
-app.get("/", (req, res) => {
-  res.send("Hello from Node API.");
 });
 
 // Get artist by id
