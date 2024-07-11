@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const cors = require("cors"); // Import cors package
+const cors = require("cors");
 const dotenv = require("dotenv");
 const { Artist } = require("./models/artist.model.js");
 
@@ -9,21 +9,17 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-// Example with specific configuration options
 const corsOptions = {
-  origin: "http://localhost:3000", // Allow only requests from this origin
-  methods: "GET,POST,PUT,DELETE", // Allow these HTTP methods
-  allowedHeaders: "Content-Type,Authorization", // Allow these headers
-  credentials: true, // Allow sending cookies and authorization headers
+  origin: "http://localhost:3000",
+  methods: "GET,POST,PUT,DELETE",
+  allowedHeaders: "Content-Type,Authorization",
+  credentials: true,
 };
-
-// Use cors middleware with specific options
 app.use(cors(corsOptions));
 
 const mongoUri = process.env.MONGODB_URI;
 const port = process.env.PORT || 3000;
 
-// MongoDB connection code
 mongoose
   .connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
@@ -33,7 +29,32 @@ mongoose
     console.log("Connection failed!", error);
   });
 
-// REST API routes
+// Get songs for all albums of a specific artist
+app.get("/api/artists/:id/songs", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find the artist by ID
+    const artist = await Artist.findById(id);
+    if (!artist) {
+      return res.status(404).json({ message: "Artist not found" });
+    }
+
+    // Collect all songs from all albums of the artist
+    let songs = [];
+    artist.albums.forEach((album) => {
+      album.songs.forEach((song) => {
+        songs.push(song);
+      });
+    });
+
+    res.status(200).json(songs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Other routes for CRUD operations on artists
 
 // Get artist by id
 app.get("/api/artists/:id", async (req, res) => {
@@ -59,7 +80,7 @@ app.get("/api/artists", async (req, res) => {
   }
 });
 
-// Create artists
+// Create artist
 app.post("/api/artists", async (req, res) => {
   try {
     const artists = await Artist.insertMany(req.body);
