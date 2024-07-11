@@ -1,17 +1,29 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors"); // Import cors package
 const dotenv = require("dotenv");
 const { Artist } = require("./models/artist.model.js");
 
-// Load environment variables from .env file
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// Example with specific configuration options
+const corsOptions = {
+  origin: "http://localhost:3000", // Allow only requests from this origin
+  methods: "GET,POST,PUT,DELETE", // Allow these HTTP methods
+  allowedHeaders: "Content-Type,Authorization", // Allow these headers
+  credentials: true, // Allow sending cookies and authorization headers
+};
+
+// Use cors middleware with specific options
+app.use(cors(corsOptions));
+
 const mongoUri = process.env.MONGODB_URI;
 const port = process.env.PORT || 3000;
 
+// MongoDB connection code
 mongoose
   .connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
@@ -21,9 +33,7 @@ mongoose
     console.log("Connection failed!", error);
   });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+// REST API routes
 
 // Get artist by id
 app.get("/api/artists/:id", async (req, res) => {
@@ -85,4 +95,8 @@ app.delete("/api/artists/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
